@@ -1,0 +1,36 @@
+# Build artifacts
+build/
+cmake-build-*/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Compiled objects and binaries
+*.o
+*.obj
+*.exe
+*.out
+*.a
+*.lib
+*.dll
+*.so
+*.dylib
+
+# OS files
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# CMake generated
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# Columnar data (generated at runtime)
+*.snowcol

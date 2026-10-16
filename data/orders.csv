@@ -1,0 +1,21 @@
+order_id,customer,city,product,quantity,amount,order_date
+1001,Alice,New York,Laptop,1,1200.50,2024-01-15
+1002,Bob,San Francisco,Phone,2,1599.98,2024-01-16
+1003,Charlie,New York,Tablet,1,499.99,2024-01-16
+1004,Diana,Chicago,Laptop,1,1200.50,2024-01-17
+1005,Eve,San Francisco,Phone,3,2399.97,2024-01-17
+1006,Frank,Chicago,Tablet,2,999.98,2024-01-18
+1007,Grace,New York,Laptop,2,2401.00,2024-01-18
+1008,Hank,San Francisco,Keyboard,5,249.95,2024-01-19
+1009,Ivy,Chicago,Monitor,1,349.99,2024-01-19
+1010,Jack,New York,Mouse,10,199.90,2024-01-20
+1011,Alice,New York,Phone,1,799.99,2024-01-20
+1012,Bob,San Francisco,Monitor,2,699.98,2024-01-21
+1013,Charlie,New York,Keyboard,3,149.97,2024-01-21
+1014,Diana,Chicago,Mouse,4,79.96,2024-01-22
+1015,Eve,San Francisco,Laptop,1,1200.50,2024-01-22
+1016,Frank,Chicago,Phone,2,1599.98,2024-02-01
+1017,Grace,New York,Tablet,1,499.99,2024-02-01
+1018,Hank,San Francisco,Laptop,1,1200.50,2024-02-02
+1019,Ivy,Chicago,Keyboard,2,99.98,2024-02-02
+1020,Jack,New York,Monitor,1,349.99,2024-02-03
