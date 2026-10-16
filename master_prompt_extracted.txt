@@ -1,0 +1,422 @@
+<USER_REQUEST>
+# MASTER IMPLEMENTATION PROMPT â€” SNOWQUERY
+## Complete All Remaining Phases of the C++ Analytical Database Engine
+
+### 1. Your role
+
+Act as a senior C++ systems engineer, database kernel developer, query optimizer engineer, and performance engineer with expertise in analytical databases, SQL execution, columnar storage, and parallel computing.
+
+You are working in my existing Google Antigravity workspace:
+
+`D:\Snowflake\DB`
+
+The project is named **SnowQuery**, a C++20 educational analytical database engine inspired by the general engineering principles of modern analytical databases such as Snowflake.
+
+Phase 1 has already been implemented. According to the previous completion report, the project includes CSV ingestion, type inference, basic table and column-store structures, execution metrics, a CLI, CMake configuration, sample data, and initial tests.
+
+Your task is to inspect the existing repository and then **implement every remaining phase, Phase 2 through Phase 6, in one continuous development task**.
+
+Do not stop after writing a plan, finishing Phase 2, or asking me whether you should continue. Continue through all phases automatically unless a genuine blocker prevents further progress.
+
+You may organize your internal work into phases, but you must complete the full implementation scope before declaring the task finished.
+
+---
+
+### 2. Mandatory working rules
+
+1. Inspect the entire existing repository before making changes.
+2. Preserve all working Phase 1 functionality and existing user data.
+3. Reuse existing classes, interfaces, and source files wherever appropriate.
+4. Do not recreate the project from scratch or unnecessarily replace working files.
+5. Use C++20 for the core database engine.
+6. Use the existing GCC/MSYS2 UCRT64 toolchain, CMake, and Ninja where available.
+7. Avoid unnecessary third-party dependencies.
+8. Do not use Python, SQLite, PostgreSQL, DuckDB, or another external database as a substitute for implementing the core engine in C++.
+9. Build actual features, not mock implementations, placeholder methods, or hardcoded results.
+10. Compile and test frequently during development, but continue automatically through all remaining phases.
+11. Fix compilation errors, failing tests, regressions, and discovered correctness issues before proceeding.
+12. Never fabricate successful tests, benchmark measurements, or performance improvements.
+13. If an optional feature is blocked, implement the remaining feasible features and document the blocker precisely.
+14. Do not ask me for permission between phases. Make reasonable engineering decisions and continue.
+15. At the end, provide one consolidated completion report covering all phases, tests, benchmarks, commands, and limitations.
+
+### 3. Phase 2 â€” Complete SQL query execution
+
+Build a genuine SQL execution pipeline.
+
+#### Tokenizer and parser
+
+Implement a tokenizer and a real parser using an abstract syntax tree or an equivalent structured representation.
+
+Support the following SQL subset:
+
+- SELECT with explicit columns and SELECT *
+- FROM using the currently loaded table
+- WHERE
+- AND and OR with correct precedence
+- Parentheses in filter expressions
+- Comparison operators: =, !=, <>, <, >, <=, >=
+- Numeric, string, and supported Boolean literals
+- ORDER BY with ASC and DESC
+- LIMIT
+- GROUP BY
+- COUNT(*), COUNT(column), SUM(column), MIN(column), MAX(column)
+
+Implement correct expression precedence and meaningful syntax errors.
+
+Document unsupported SQL features clearly instead of pretending to support the full SQL standard.
+
+#### Query execution
+
+Execute queries against the existing table and column-store abstractions.
+
+Implement:
+
+- Column resolution and projection
+- Type-aware comparisons
+- Filtering
+- Sorting
+- LIMIT
+- Aggregation
+- Grouped aggregation
+- Correct handling of empty input and empty groups
+- Consistent result schemas
+- Error handling for unknown columns, invalid types, malformed queries, and unsupported expressions
+
+Avoid converting every operation into unnecessary intermediate copies. Establish a clean execution architecture that later optimization phases can use.
+
+#### CLI integration
+
+Extend the existing shell to execute SQL queries against the loaded CSV table.
+
+Example:
+
+SELECT city, SUM(amount) FROM orders GROUP BY city ORDER BY SUM(amount) DESC;
+
+Preserve existing commands such as `.schema` and `.quit`.
+
+If practical, support executing a SQL statement directly through a command-line option.
+
+Update the README with exact usage instructions and supported SQL syntax.
+
+### 4. Phase 3 â€” Persistent columnar storage and data skipping
+
+Transform the initial in-memory column store into a useful columnar storage subsystem.
+
+#### Columnar representation
+
+Implement typed column storage with appropriate support for the existing data types, such as:
+
+- Integer
+- Floating point
+- Text
+- Boolean if supported by the schema
+
+Define how null values and missing fields are represented. If null support is not implemented completely, document the limitation and ensure it does not silently produce incorrect query results.
+
+#### Persistent binary format
+
+Design a documented binary columnar file format that supports:
+
+- File header and format version
+- Schema metadata
+- Row count and column count
+- Column data and offsets
+- Data block boundaries
+- Basic validation and error detection
+
+Implement functions to write a table or column store to disk and load it back.
+
+Validate file headers, lengths, offsets, and schema metadata. Reject truncated, corrupted, or incompatible files safely.
+
+Do not serialize raw C++ objects or pointers directly into the file.
+
+#### Block-level metadata and pruning
+
+Divide columns into manageable blocks and store relevant metadata, including minimum and maximum values for supported comparable types.
+
+Implement predicate-based data skipping so blocks that cannot match a supported filter are not read or scanned unnecessarily.
+
+For example, if a block contains values from 100 to 200, a query filtering for values greater than 500 should be able to skip that block.
+
+Ensure that pruning is conservative and never removes a block that could contain a valid result.
+
+Support correctness-preserving fallbacks when statistics are unavailable or a predicate cannot be evaluated safely.
+
+Add tests that compare pruning-enabled and pruning-disabled query results.
+
+### 5. Phase 4 â€” Query planning and optimization
+
+Build a basic but real query optimization pipeline.
+
+#### Logical planning
+
+Represent query operations as logical operators, such as:
+
+- Scan
+- Filter
+- Project
+- Sort
+- Aggregate
+- Limit
+- Join
+
+Transform parsed SQL into a logical query plan.
+
+#### Physical planning and execution
+
+Create physical operators appropriate for the supported query types.
+
+Implement:
+
+- Predicate pushdown
+- Projection pushdown
+- Column pruning
+- Data skipping using storage metadata
+- Efficient operator ordering where correctness permits
+- Reduced intermediate materialization where practical
+
+Ensure optimizations preserve SQL semantics.
+
+#### EXPLAIN
+
+Add an EXPLAIN command that displays a readable query plan, including relevant information such as:
+
+- Operators
+- Filter conditions
+- Projected columns
+- Estimated or actual row counts where available
+- Data blocks scanned and skipped
+- Whether predicate or projection pushdown was applied
+
+Do not report estimates as actual measurements. Label estimated and measured values distinctly.
+
+### 6. Phase 5 â€” Performance engineering and parallel execution
+
+Implement real performance features and validate them with measurements.
+
+#### Batch-oriented execution
+
+Introduce batch or vectorized processing where appropriate so operators can process groups of values instead of relying exclusively on per-row virtual or interpreted operations.
+
+Keep the implementation understandable and testable.
+
+#### Parallel scans
+
+Use C++20-compatible threading facilities to execute independent scan work in parallel where appropriate.
+
+Requirements:
+
+- Correct synchronization
+- No data races
+- Safe worker lifecycle management
+- Correct exception propagation
+- Correct result combination
+- Configurable or sensible worker counts
+- A sequential fallback for small workloads or unsupported cases
+
+Do not parallelize operations where the overhead exceeds the expected benefit without a reasonable execution strategy.
+
+#### Parallel aggregation
+
+Implement partial aggregation for supported aggregate operations.
+
+Combine worker-local results correctly. Handle empty partitions and numeric overflow considerations appropriately.
+
+#### Hash joins
+
+Implement an actual hash join for supported equality-join conditions.
+
+Extend the SQL parser and query planner to support a documented subset of joins, such as:
+
+SELECT customers.name, orders.amount
+FROM customers
+JOIN orders ON customers.id = orders.customer_id;
+
+Allow loading or registering multiple tables through a documented CLI workflow.
+
+Implement correct column qualification, join-key resolution, result schemas, and duplicate column-name handling.
+
+If only inner joins are implemented, explicitly document that limitation rather than claiming support for every join type.
+
+#### Benchmarking
+
+Create a reproducible benchmark executable or framework.
+
+Generate or load datasets at multiple sizes, for example:
+
+- 10,000 rows
+- 100,000 rows
+- 1,000,000 rows where system resources permit
+
+Benchmark representative operations:
+
+- Full table scan
+- Selective filter
+- Projection
+- Aggregation
+- GROUP BY
+- Join
+- Storage write and read
+- Sequential versus parallel scans
+- Pruning-enabled versus pruning-disabled execution
+
+Record actual results, including dataset size, query, execution time, and relevant scan metrics.
+
+Compare baseline and optimized implementations using the same data and equivalent queries.
+
+Do not invent speedups, benchmark results, or performance claims. If a benchmark cannot be run, provide the executable and clearly mark its results as not measured.
+
+### 7. Phase 6 â€” Reliability, automated tests, and documentation
+
+Bring the entire project to a stable, demonstrable state.
+
+#### Automated tests
+
+Expand the existing test suite to cover:
+
+- Tokenizer and parser correctness
+- SQL syntax errors
+- Expression precedence
+- Filtering and type comparisons
+- Sorting and LIMIT
+- Aggregations and GROUP BY
+- Multiple-table joins
+- Persistent storage round trips
+- Corrupted and truncated storage files
+- Block pruning correctness
+- Predicate and projection pushdown
+- Parallel versus sequential query result equivalence
+- Error handling
+- Regression tests for Phase 1
+
+Use CTest and the project's existing test framework. Add GoogleTest only if its dependency setup is practical and reliable.
+
+Include deterministic test fixtures and edge cases.
+
+#### Reliability
+
+Improve:
+
+- Error messages
+- Invalid input handling
+- File I/O failures
+- Memory safety
+- Integer overflow checks where appropriate
+- Resource cleanup
+- Query execution failure handling
+- Storage format validation
+
+Avoid undefined behavior, unnecessary global state, and unsafe shared mutable state.
+
+#### Documentation
+
+Update or create:
+
+- README.md
+- `docs/architecture.md`
+- `docs/implementation_guide.md`
+- `docs/benchmark_results.md`
+- `docs/sql_reference.md`
+- `docs/storage_format.md`
+
+Explain the system in clear language, including:
+
+1. How CSV data enters the engine.
+2. How tables and columns are represented.
+3. How SQL is tokenized and parsed.
+4. How a query becomes a logical and physical plan.
+5. How the executor evaluates that plan.
+6. How columnar storage and metadata-based pruning work.
+7. How multiple tables are loaded and joined.
+8. How parallel workers operate.
+9. How metrics and benchmarks are collected.
+10. What is implemented and what remains outside the supported SQL subset.
+
+Include real build commands, sample queries, expected outputs, and troubleshooting instructions for Windows and MSYS2 UCRT64.
+
+### 8. Required repository quality
+
+Keep the repository organized and consistent with its existing layout.
+
+You may add new source and header files for the tokenizer, parser, AST, planner, operators, join executor, storage reader/writer, and benchmark infrastructure.
+
+Update `CMakeLists.txt` for every new source file, executable, and test target.
+
+Use sensible names, clear interfaces, const-correctness, RAII, and standard C++ resource management.
+
+Use compiler warnings and resolve new warnings where practical.
+
+Do not disable warnings merely to make the build appear clean.
+
+Keep generated binaries and build directories out of source control.
+
+### 9. Continuous execution instructions
+
+Execute this entire task in one continuous agent session.
+
+Use the following internal workflow without stopping to request approval:
+
+1. Inspect repository and current implementation.
+2. Finish or repair any incomplete Phase 1 functionality.
+3. Implement Phase 2.
+4. Implement Phase 3.
+5. Implement Phase 4.
+6. Implement Phase 5.
+7. Implement Phase 6.
+8. Run a final clean build.
+9. Run the complete automated test suite.
+10. Run representative SQL examples and available benchmarks.
+11. Fix regressions and rebuild.
+12. Update all documentation.
+13. Produce the consolidated completion report.
+
+You may perform these steps incrementally internally, but do not stop at a phase boundary merely to ask whether to continue.
+
+If context limits or execution constraints prevent completing the entire task in one session, finish the current operation safely, preserve the work, and report exactly what remains. Never falsely claim the whole project is complete.
+
+### 10. Final acceptance criteria
+
+The project is complete only when the following criteria have been addressed:
+
+- The existing project still builds with the intended Windows toolchain.
+- The SQL tokenizer, parser, and executor work for the documented subset.
+- SQL results are correct for representative queries.
+- Columnar data can be persisted and loaded.
+- Metadata-based data skipping works and preserves correctness.
+- Query plans can be inspected.
+- Predicate and projection pushdown work for supported cases.
+- Parallel execution and hash joins are implemented and tested, or any genuine blocker is explicitly documented.
+- Automated tests pass.
+- Benchmarks have been run where possible, with actual results or a clear statement that results are unavailable.
+- Documentation matches the implementation.
+- Existing Phase 1 behavior remains functional.
+
+### 11. Final report
+
+When all feasible work is complete, provide one comprehensive report containing:
+
+1. A summary of the implementation.
+2. A feature-by-feature status for Phases 1â€“6.
+3. New and modified files.
+4. Exact build and test commands.
+5. Actual build output and test counts.
+6. Representative SQL queries and verified results.
+7. Benchmark methodology and actual measured results.
+8. Known limitations and unfinished features.
+9. Instructions to run and demonstrate the project.
+10. Suggested future improvements.
+
+Distinguish clearly between implemented, tested, partially implemented, and not implemented features.
+
+**Begin now. Inspect the existing repository and continue implementing all remaining phases without waiting for additional confirmation.**
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-10-16T16:27:01+05:30.
+
+The user's current state is as follows:
+Active Document: d:\Snowflake\DB\CMakeLists.txt (LANGUAGE_CMAKE)
+Cursor is on line: 1
+Other open documents:
+- d:\Snowflake\DB\CMakeLists.txt (LANGUAGE_CMAKE)
+</ADDITIONAL_METADATA>

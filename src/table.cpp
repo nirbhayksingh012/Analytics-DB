@@ -94,6 +94,13 @@ Value parse_value(const std::string& raw, DataType hint) {
 Table::Table(std::string name, std::vector<ColumnDef> schema)
     : name_(std::move(name)), schema_(std::move(schema)) {}
 
+Table::Table(std::string name, std::vector<ColumnDef> schema, std::vector<Row> rows)
+    : name_(std::move(name)), schema_(std::move(schema)), rows_(std::move(rows)) {}
+
+void Table::add_row(Row row) {
+    rows_.push_back(std::move(row));
+}
+
 int Table::column_index(const std::string& col_name) const {
     for (size_t i = 0; i < schema_.size(); ++i) {
         // Case-insensitive comparison.

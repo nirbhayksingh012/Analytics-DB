@@ -44,6 +44,12 @@ public:
     /// Construct an empty table with a given schema.
     explicit Table(std::string name, std::vector<ColumnDef> schema);
 
+    /// Construct a table with schema and rows.
+    Table(std::string name, std::vector<ColumnDef> schema, std::vector<Row> rows);
+
+    /// Append a row to the table.
+    void add_row(Row row);
+
     /// Build a table from CSV data, inferring types automatically.
     /// @param table_name  logical name (e.g. "orders")
     /// @param headers     column names

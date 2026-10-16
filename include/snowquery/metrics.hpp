@@ -22,6 +22,11 @@ struct QueryMetrics {
 
     std::chrono::microseconds total_time{0};
 
+    /// Total elapsed time in milliseconds.
+    double total_time_ms() const { return total_time.count() / 1000.0; }
+    /// Total elapsed time in seconds.
+    double total_time_s() const { return total_time.count() / 1000000.0; }
+
     /// Pretty-print the metrics.
     void print(std::ostream& out) const;
 };

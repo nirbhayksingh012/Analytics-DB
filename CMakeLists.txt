@@ -22,12 +22,21 @@ add_library(snowquery_core STATIC
     src/table.cpp
     src/column_store.cpp
     src/metrics.cpp
+    src/sql_parser.cpp
+    src/executor.cpp
+    src/storage.cpp
+    src/optimizer.cpp
+    src/parallel.cpp
 )
 target_include_directories(snowquery_core PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
 # ── Main executable ────────────────────────────────────────────────
 add_executable(snowquery src/main.cpp)
 target_link_libraries(snowquery PRIVATE snowquery_core)
+
+# ── Benchmark executable ───────────────────────────────────────────
+add_executable(snowquery_bench benchmarks/benchmark.cpp)
+target_link_libraries(snowquery_bench PRIVATE snowquery_core)
 
 # ── Tests ──────────────────────────────────────────────────────────
 enable_testing()
@@ -39,3 +48,26 @@ add_test(NAME CSVReaderTests COMMAND test_csv_reader)
 add_executable(test_table tests/test_table.cpp)
 target_link_libraries(test_table PRIVATE snowquery_core)
 add_test(NAME TableTests COMMAND test_table)
+
+add_executable(test_sql_parser tests/test_sql_parser.cpp)
+target_link_libraries(test_sql_parser PRIVATE snowquery_core)
+add_test(NAME SqlParserTests COMMAND test_sql_parser)
+
+add_executable(test_executor tests/test_executor.cpp)
+target_link_libraries(test_executor PRIVATE snowquery_core)
+add_test(NAME ExecutorTests COMMAND test_executor)
+
+add_executable(test_storage tests/test_storage.cpp)
+target_link_libraries(test_storage PRIVATE snowquery_core)
+add_test(NAME StorageTests COMMAND test_storage)
+
+add_executable(test_optimizer tests/test_optimizer.cpp)
+target_link_libraries(test_optimizer PRIVATE snowquery_core)
+add_test(NAME OptimizerTests COMMAND test_optimizer)
+
+add_executable(test_parallel tests/test_parallel.cpp)
+target_link_libraries(test_parallel PRIVATE snowquery_core)
+add_test(NAME ParallelTests COMMAND test_parallel)
+
+
+
